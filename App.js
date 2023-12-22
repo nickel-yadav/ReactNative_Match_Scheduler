@@ -16,7 +16,7 @@ function App() {
           options={{
             headerShown: false,
             tabBarIcon: () => (
-              <Ionicons name="ios-home-outline" size={24} color="#11235A" />
+              <Ionicons name="ios-home-outline" size={24} color="blue" />
             ),
           }}
         />

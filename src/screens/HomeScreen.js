@@ -1,11 +1,17 @@
-import * as React from "react";
+import React, { useState } from "react";
 import { TouchableOpacity } from "react-native";
 import { View, Text, StyleSheet } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
+import CalendarModal from "../components/CalendarModal";
 
 function HomeScreen() {
+  const [isCalendarVisible, setIsCalendarVisible] = useState(false);
   return (
     <View style={{ flex: 1 }}>
+      <CalendarModal
+        isVisible={isCalendarVisible}
+        setIsVisible={setIsCalendarVisible}
+      />
       <View style={styles.headerTop}>
         <View style={styles.contentContainer}>
           <Text style={styles.heading}>Fantasy Match Scheduler</Text>
@@ -16,7 +22,10 @@ function HomeScreen() {
         </View>
       </View>
       <View style={styles.schedulesPane}>
-        <TouchableOpacity style={styles.scheduleBtn}>
+        <TouchableOpacity
+          style={styles.scheduleBtn}
+          onPress={() => setIsCalendarVisible(true)}
+        >
           <Text style={styles.scheduleBtnTitle}>Create Schedule</Text>
           <AntDesign
             name="pluscircleo"
