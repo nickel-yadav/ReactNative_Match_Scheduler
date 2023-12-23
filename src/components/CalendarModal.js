@@ -4,16 +4,93 @@ import ModalWrapper from "./ModalWrapper";
 import { Calendar } from "react-native-calendars";
 import { AntDesign } from "@expo/vector-icons";
 import { FontAwesome } from "@expo/vector-icons";
+import { endOfMonth, eachDayOfInterval, addDays, format } from "date-fns";
+import { Ionicons } from "@expo/vector-icons";
+
+const currentDate = format(new Date(), "yyyy-MM-dd");
 
 export default function CalendarModal({ isVisible, setIsVisible }) {
-  const [selected, setSelected] = useState("");
+  const [selectedDates, setSelectedDates] = useState({});
 
   const handleSelectFollowing15Days = () => {
-    // TODO: Store selection data
+    const lastSelectedDate = Object.keys(selectedDates).pop();
+    let startDate = new Date();
+    if (lastSelectedDate) {
+      startDate = new Date(lastSelectedDate);
+    }
+    const updatedDates = { ...selectedDates };
+    for (let i = 1; i <= 15; i++) {
+      const date = addDays(startDate, i);
+      const dateString = format(date, "yyyy-MM-dd");
+
+      updatedDates[dateString] = {
+        selected: true,
+        marked: true,
+        selectedColor: "blue",
+      };
+    }
+    setSelectedDates(updatedDates);
   };
 
   const handleSelectEntireMonth = () => {
-    // TODO: Store selection data
+    let today = new Date();
+    const existingDates = Object.keys(selectedDates);
+
+    if (existingDates.length > 0) {
+      const lastSelectedDate = new Date(
+        existingDates[existingDates.length - 1]
+      );
+      today = lastSelectedDate;
+    }
+
+    console.log("las", existingDates);
+
+    const start = today;
+    const end = endOfMonth(today);
+    const monthDates = eachDayOfInterval({ start, end });
+
+    const updatedDates = { ...selectedDates };
+
+    monthDates.forEach((date) => {
+      const dateString = format(date, "yyyy-MM-dd");
+      updatedDates[dateString] = {
+        selected: true,
+        marked: true,
+        selectedColor: "blue",
+      };
+    });
+
+    setSelectedDates(updatedDates);
+  };
+
+  const handleDatePress = (date) => {
+    const updatedDates = { ...selectedDates };
+    if (updatedDates[date]) {
+      delete updatedDates[date];
+    } else {
+      updatedDates[date] = {
+        selected: true,
+        marked: true,
+        selectedColor: "#7ED7C1",
+      };
+    }
+    setSelectedDates(updatedDates);
+  };
+
+  const handleReset = () => {
+    setSelectedDates({});
+  };
+
+  const handleProceedToSlotSelection = (selectedDates) => {
+    if (Object.keys(selectedDates).length === 0) {
+      // Object is empty
+      console.log("Selected dates object is empty");
+      // Handle the event when the object is empty
+    } else {
+      // Object is not empty
+      console.log("Selected dates object is not empty");
+      // Handle the event when the object is not empty
+    }
   };
 
   return (
@@ -31,16 +108,9 @@ export default function CalendarModal({ isVisible, setIsVisible }) {
           </Text>
         </View>
         <Calendar
-          onDayPress={(day) => {
-            setSelected(day.dateString);
-          }}
-          markedDates={{
-            [selected]: {
-              selected: true,
-              disableTouchEvent: true,
-              selectedDotColor: "orange",
-            },
-          }}
+          onDayPress={(day) => handleDatePress(day.dateString)}
+          markedDates={selectedDates}
+          minDate={currentDate}
         />
         <View style={styles.selectionContainer}>
           <TouchableOpacity
@@ -50,16 +120,44 @@ export default function CalendarModal({ isVisible, setIsVisible }) {
             <Text>Select Following 15 Days</Text>
             <AntDesign name="checkcircleo" size={16} color="#65B741" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.selectionBtn}>
+          <TouchableOpacity
+            style={styles.selectionBtn}
+            onPress={handleSelectEntireMonth}
+          >
             <Text>Select Entire Month</Text>
             <AntDesign name="checkcircleo" size={16} color="#65B741" />
           </TouchableOpacity>
         </View>
-        <View style={styles.confirmationBtnContainer}>
-          <TouchableOpacity style={styles.confirmationBtn}>
-            <Text style={{ color: "white" }}>Continue to Slot Selection</Text>
-            <FontAwesome name="long-arrow-right" size={16} color="white" />
-          </TouchableOpacity>
+        <View style={{ alignItems: "center" }}>
+          <View style={styles.resetAndProceedBtnContainer}>
+            <TouchableOpacity style={styles.clearBtn} onPress={handleReset}>
+              <Text style={{ color: "white" }}>Reset</Text>
+              <Ionicons name="ios-refresh" size={16} color="white" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.confirmationBtn,
+                {
+                  backgroundColor:
+                    Object.keys(selectedDates).length === 0
+                      ? "#EEF5FF"
+                      : "#67729D",
+                },
+              ]}
+              onPress={handleProceedToSlotSelection}
+              disabled={Object.keys(selectedDates).length === 0}
+            >
+              <Text
+                style={{
+                  color:
+                    Object.keys(selectedDates).length === 0 ? "black" : "white",
+                }}
+              >
+                Slot Selection
+              </Text>
+              <FontAwesome name="long-arrow-right" size={16} color="white" />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </ModalWrapper>
@@ -101,19 +199,28 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  confirmationBtn: {
+  resetAndProceedBtnContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "80%",
     marginTop: 10,
+  },
+  clearBtn: {
     padding: 14,
     backgroundColor: "#67729D",
     borderRadius: 12,
-    width: "80%",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    flexGrow: 1,
+    marginRight: 10,
   },
-  confirmationBtnContainer: {
+  confirmationBtn: {
+    padding: 14,
+    borderRadius: 12,
+    flexGrow: 1,
     flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 20,
+    justifyContent: "space-between",
+    alignItems: "center",
   },
 });
