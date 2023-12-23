@@ -26,7 +26,7 @@ export default function CalendarModal({ isVisible, setIsVisible }) {
       updatedDates[dateString] = {
         selected: true,
         marked: true,
-        selectedColor: "blue",
+        selectedColor: "#7ED7C1",
       };
     }
     setSelectedDates(updatedDates);
@@ -43,8 +43,6 @@ export default function CalendarModal({ isVisible, setIsVisible }) {
       today = lastSelectedDate;
     }
 
-    console.log("las", existingDates);
-
     const start = today;
     const end = endOfMonth(today);
     const monthDates = eachDayOfInterval({ start, end });
@@ -56,7 +54,7 @@ export default function CalendarModal({ isVisible, setIsVisible }) {
       updatedDates[dateString] = {
         selected: true,
         marked: true,
-        selectedColor: "blue",
+        selectedColor: "#7ED7C1",
       };
     });
 
