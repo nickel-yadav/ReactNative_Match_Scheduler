@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, Alert } from "react-native";
 import React, { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -56,8 +56,43 @@ export default function SlotSelectionCard() {
       const updatedSlots = finalizedSlots.filter(
         (slot) => !selectedSlots.includes(slot)
       );
-      setFinalizedSlots(updatedSlots);
-      setSelectedSlots([]);
+      if (updatedSlots.length !== finalizedSlots.length) {
+        Alert.alert(
+          "Are you sure ?",
+          "This action will delete the selected slot !",
+          [
+            {
+              text: "Cancel",
+              style: "cancel",
+            },
+            {
+              text: "OK",
+              onPress: () => {
+                setFinalizedSlots(updatedSlots);
+                setSelectedSlots([]);
+              },
+              style: "default",
+            },
+          ],
+          { cancelable: false }
+        );
+      } else {
+        Alert.alert(
+          "This slot has not been selected",
+          "Please add this slot to enable deletion",
+          [
+            {
+              text: "OK",
+              onPress: () => {
+                setFinalizedSlots(updatedSlots);
+                setSelectedSlots([]);
+              },
+              style: "default",
+            },
+          ],
+          { cancelable: false }
+        );
+      }
     }
   };
 
