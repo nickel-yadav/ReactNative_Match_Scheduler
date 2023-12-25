@@ -16,6 +16,8 @@ export default function SlotSelectionScreen() {
         <Text style={styles.contentHeading}>Your Slots</Text>
         <FlatList
           data={selectedDates}
+          contentContainerStyle={{ paddingBottom: 150 }}
+          showsVerticalScrollIndicator={false}
           renderItem={({ item }) => <SlotSelectionCard date={item.date} />}
         />
       </View>
