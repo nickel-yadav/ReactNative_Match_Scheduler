@@ -1,9 +1,11 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, FlatList } from "react-native";
 import React from "react";
 import HeaderTop from "../components/HeaderTop";
 import SlotSelectionCard from "../components/SlotSelectionCard";
+import { useSelector } from "react-redux";
 
 export default function SlotSelectionScreen() {
+  const selectedDates = useSelector((state) => state.schedule.selectedDates);
   return (
     <View style={{ flex: 1 }}>
       <HeaderTop
@@ -12,7 +14,12 @@ export default function SlotSelectionScreen() {
       />
       <View style={styles.contentContainer}>
         <Text style={styles.contentHeading}>Your Slots</Text>
-        <SlotSelectionCard />
+        <FlatList
+          data={selectedDates}
+          contentContainerStyle={{ paddingBottom: 150 }}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item }) => <SlotSelectionCard date={item.date} />}
+        />
       </View>
     </View>
   );

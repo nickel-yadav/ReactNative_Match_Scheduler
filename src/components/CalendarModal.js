@@ -1,95 +1,109 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import React, { useState } from "react";
+import React from "react";
 import ModalWrapper from "./ModalWrapper";
 import { Calendar } from "react-native-calendars";
 import { AntDesign } from "@expo/vector-icons";
 import { FontAwesome } from "@expo/vector-icons";
 import { endOfMonth, eachDayOfInterval, addDays, format } from "date-fns";
 import { Ionicons } from "@expo/vector-icons";
+import { useDispatch, useSelector } from "react-redux";
+import { selectDates, clearDates } from "../features/scheduleSlice";
+import { useNavigation } from "@react-navigation/native";
 
 const currentDate = format(new Date(), "yyyy-MM-dd");
 
 export default function CalendarModal({ isVisible, setIsVisible }) {
-  const [selectedDates, setSelectedDates] = useState({});
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
+  const selectedDates = useSelector((state) => state.schedule.selectedDates);
 
   const handleSelectFollowing15Days = () => {
-    const lastSelectedDate = Object.keys(selectedDates).pop();
-    let startDate = new Date();
-    if (lastSelectedDate) {
-      startDate = new Date(lastSelectedDate);
-    }
-    const updatedDates = { ...selectedDates };
+    const lastSelectedDate =
+      selectedDates.length > 0
+        ? selectedDates[selectedDates.length - 1].date
+        : new Date();
+    let startDate = new Date(lastSelectedDate);
+
+    const updatedDates = [];
     for (let i = 1; i <= 15; i++) {
       const date = addDays(startDate, i);
       const dateString = format(date, "yyyy-MM-dd");
 
-      updatedDates[dateString] = {
+      updatedDates.push({
+        date: dateString,
         selected: true,
         marked: true,
         selectedColor: "#7ED7C1",
-      };
+      });
     }
-    setSelectedDates(updatedDates);
+    dispatch(selectDates([...selectedDates, ...updatedDates]));
   };
 
   const handleSelectEntireMonth = () => {
     let today = new Date();
-    const existingDates = Object.keys(selectedDates);
+    const existingDates = selectedDates.map((dateObj) => dateObj.date);
 
-    if (existingDates.length > 0) {
-      const lastSelectedDate = new Date(
-        existingDates[existingDates.length - 1]
-      );
-      today = lastSelectedDate;
-    }
+    const lastSelectedDate =
+      existingDates.length > 0
+        ? existingDates[existingDates.length - 1]
+        : today;
+    today = new Date(lastSelectedDate);
 
     const start = today;
     const end = endOfMonth(today);
     const monthDates = eachDayOfInterval({ start, end });
 
-    const updatedDates = { ...selectedDates };
+    const updatedDates = monthDates.map((date) => ({
+      date: format(date, "yyyy-MM-dd"),
+      selected: true,
+      marked: true,
+      selectedColor: "#7ED7C1",
+    }));
 
-    monthDates.forEach((date) => {
-      const dateString = format(date, "yyyy-MM-dd");
-      updatedDates[dateString] = {
-        selected: true,
-        marked: true,
-        selectedColor: "#7ED7C1",
-      };
-    });
-
-    setSelectedDates(updatedDates);
+    dispatch(selectDates([...selectedDates, ...updatedDates]));
   };
 
   const handleDatePress = (date) => {
-    const updatedDates = { ...selectedDates };
-    if (updatedDates[date]) {
-      delete updatedDates[date];
+    if (selectedDates.find((d) => d.date === date)) {
+      // Date is already selected, deselect it
+      const updatedDates = selectedDates.filter((d) => d.date !== date);
+      dispatch(selectDates(updatedDates));
     } else {
-      updatedDates[date] = {
-        selected: true,
-        marked: true,
-        selectedColor: "#7ED7C1",
-      };
+      // Date is not selected, select it
+      const updatedDates = [
+        ...selectedDates,
+        {
+          date: format(date, "yyyy-MM-dd"),
+          selected: true,
+          marked: true,
+          selectedColor: "#7ED7C1",
+        },
+      ];
+      dispatch(selectDates(updatedDates));
     }
-    setSelectedDates(updatedDates);
   };
 
   const handleReset = () => {
-    setSelectedDates({});
+    dispatch(clearDates());
   };
 
   const handleProceedToSlotSelection = (selectedDates) => {
     if (Object.keys(selectedDates).length === 0) {
-      // Object is empty
-      console.log("Selected dates object is empty");
-      // Handle the event when the object is empty
+      return;
     } else {
-      // Object is not empty
-      console.log("Selected dates object is not empty");
-      // Handle the event when the object is not empty
+      setIsVisible(false);
+      navigation.navigate("SlotSelection");
     }
   };
+
+  const markedDates = selectedDates.reduce((accumulator, currentValue) => {
+    accumulator[currentValue.date] = {
+      selected: true,
+      marked: true,
+      selectedColor: "#7ED7C1",
+    };
+    return accumulator;
+  }, {});
 
   return (
     <ModalWrapper
@@ -107,7 +121,7 @@ export default function CalendarModal({ isVisible, setIsVisible }) {
         </View>
         <Calendar
           onDayPress={(day) => handleDatePress(day.dateString)}
-          markedDates={selectedDates}
+          markedDates={markedDates}
           minDate={currentDate}
         />
         <View style={styles.selectionContainer}>
