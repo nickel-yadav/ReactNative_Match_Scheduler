@@ -12,8 +12,8 @@ export default function ScheduleQuickView({ data }) {
       <View style={styles.slotContainer}>
         {data.slots && data.slots.length > 0 ? (
           <View style={styles.flexContainer}>
-            {data.slots.map((slot) => (
-              <View style={styles.slotCard}>
+            {data.slots.map((slot, index) => (
+              <View style={styles.slotCard} key={index}>
                 <Text
                   style={{
                     marginRight: 4,
