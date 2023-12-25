@@ -4,6 +4,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Feather } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
+import { useDispatch, useSelector } from "react-redux";
+
+import { addSlotsToSchedule } from "../features/scheduleSlice";
 
 const AvailableStrings = [
   "9AM-11AM",
@@ -22,11 +25,14 @@ const getRandomStrings = () => {
   return randomStrings;
 };
 
-export default function SlotSelectionCard() {
+export default function SlotSelectionCard({ date }) {
   const [selectedSlots, setSelectedSlots] = useState([]);
   const [finalizedSlots, setFinalizedSlots] = useState([]);
   const [availableSlots] = useState(getRandomStrings());
   const [isCardExpanded, setIsCardExpanded] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const dispatch = useDispatch();
+  const selectedDates = useSelector((state) => state.schedule.selectedDates);
 
   const handleAddSlot = () => {
     if (selectedSlots.length > 0) {
@@ -37,6 +43,7 @@ export default function SlotSelectionCard() {
         return [...prevSlots, ...uniqueSelectedSlots];
       });
       setSelectedSlots([]);
+      setIsSaved(false);
     }
   };
 
@@ -70,6 +77,7 @@ export default function SlotSelectionCard() {
               onPress: () => {
                 setFinalizedSlots(updatedSlots);
                 setSelectedSlots([]);
+                setIsSaved(false);
               },
               style: "default",
             },
@@ -96,6 +104,11 @@ export default function SlotSelectionCard() {
     }
   };
 
+  const saveFinalizedSlots = () => {
+    dispatch(addSlotsToSchedule({ date, slots: finalizedSlots }));
+    setIsSaved(true);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.innerContainer}>
@@ -103,7 +116,7 @@ export default function SlotSelectionCard() {
           style={styles.headingContainer}
           onPress={() => setIsCardExpanded((prev) => !prev)}
         >
-          <Text style={styles.headingText}>Date</Text>
+          <Text style={styles.headingText}>{date}</Text>
           <AntDesign name="circledowno" size={16} color="white" />
         </TouchableOpacity>
         {isCardExpanded ? (
@@ -153,6 +166,28 @@ export default function SlotSelectionCard() {
                   color="#B31312"
                 />
               </TouchableOpacity>
+              <TouchableOpacity
+                onPress={saveFinalizedSlots}
+                style={[
+                  styles.saveBtn,
+                  !isSaved && { backgroundColor: "#EEF5FF" },
+                ]}
+              >
+                <Text style={{ marginRight: 2 }}>Save</Text>
+                {isSaved ? (
+                  <MaterialCommunityIcons
+                    name="content-save-check"
+                    size={16}
+                    color="black"
+                  />
+                ) : (
+                  <MaterialCommunityIcons
+                    name="content-save-alert-outline"
+                    size={16}
+                    color="black"
+                  />
+                )}
+              </TouchableOpacity>
             </View>
             <View style={styles.containerBottom}>
               {finalizedSlots.length === 0 ? (
@@ -163,7 +198,13 @@ export default function SlotSelectionCard() {
                 <View style={styles.flexContainer}>
                   {finalizedSlots.map((slot, index) => {
                     return (
-                      <View key={index} style={styles.slotCard}>
+                      <View
+                        key={index}
+                        style={[
+                          styles.slotCard,
+                          isSaved && { backgroundColor: "#7360DF" },
+                        ]}
+                      >
                         <Text
                           style={{
                             color: "white",
@@ -189,7 +230,13 @@ export default function SlotSelectionCard() {
               <View style={styles.flexContainer}>
                 {finalizedSlots.map((slot, index) => {
                   return (
-                    <View key={index} style={styles.slotCard}>
+                    <View
+                      key={index}
+                      style={[
+                        styles.slotCard,
+                        isSaved && { backgroundColor: "#7360DF" },
+                      ]}
+                    >
                       <Text
                         style={{
                           marginRight: 4,
@@ -276,5 +323,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     marginTop: 6,
+  },
+  saveBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    marginRight: 10,
+    borderWidth: 1,
+    borderRadius: 6,
   },
 });
