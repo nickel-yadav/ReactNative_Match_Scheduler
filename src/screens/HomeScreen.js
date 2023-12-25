@@ -3,6 +3,7 @@ import { TouchableOpacity } from "react-native";
 import { View, Text, StyleSheet } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import CalendarModal from "../components/CalendarModal";
+import HeaderTop from "../components/HeaderTop";
 
 function HomeScreen() {
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
@@ -12,15 +13,12 @@ function HomeScreen() {
         isVisible={isCalendarVisible}
         setIsVisible={setIsCalendarVisible}
       />
-      <View style={styles.headerTop}>
-        <View style={styles.contentContainer}>
-          <Text style={styles.heading}>Fantasy Match Scheduler</Text>
-          <Text style={styles.subheading}>
-            Create and manage schedules for all your fantasy matches in one
-            place.
-          </Text>
-        </View>
-      </View>
+      <HeaderTop
+        heading={"Fantasy Match Scheduler"}
+        subheading={
+          "Create and manage schedules for all your fantasy matches in one place."
+        }
+      />
       <View style={styles.schedulesPane}>
         <TouchableOpacity
           style={styles.scheduleBtn}
@@ -42,23 +40,6 @@ function HomeScreen() {
 export default HomeScreen;
 
 const styles = StyleSheet.create({
-  headerTop: {
-    height: 110,
-    width: "100%",
-    backgroundColor: "#11235A",
-    padding: 10,
-  },
-  contentContainer: {
-    paddingLeft: 40,
-  },
-  heading: {
-    fontSize: 20,
-    color: "#EEF5FF",
-    marginBottom: 12,
-  },
-  subheading: {
-    color: "#9EB8D9",
-  },
   schedulesPane: {
     flex: 1,
     justifyContent: "center",
